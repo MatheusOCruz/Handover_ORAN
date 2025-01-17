@@ -3,14 +3,14 @@ from gnb import *
 
 
 def main():
-    h.init_module(16, 2, "target.pth", "target.pth")
+    h.init_module(16, 2, "target2.pth", "target2.pth")
     np.random.seed(14012003)
-    gnb = Gnb(1)
+    gnb = Gnb([1,3])
 
     for _ in range(5000):
-
-        if h.handover_decision(*gnb.get_metrics()):
-            gnb.handover()
+        for rnti in range(len(gnb.ues)):
+            if h.handover_decision(*gnb.get_metrics(rnti)):
+                gnb.handover(rnti)
 
     gnb.plot_things()
 

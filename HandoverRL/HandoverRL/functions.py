@@ -47,8 +47,8 @@ def init_module(metric_buffer_len, n_actions,
         save_path, \
         tower_0, tower_1, buf_len
 
-    tower_0 = deque(maxlen=metric_buffer_len)
-    tower_1 = deque(maxlen=metric_buffer_len)
+    #tower_0 = deque(maxlen=metric_buffer_len)
+    #tower_1 = deque(maxlen=metric_buffer_len)
     buf_len = metric_buffer_len
 
     save_path = target_net_state_dict_save_path
@@ -126,58 +126,60 @@ def select_action(state):
 
 acc_reward = 0
 steps = 0
-last_state = None
-last_action = None
-last_tower = None
 
 
-def train_step(tower_0_metric: float, tower_1_metric: float, torre_atual: int, hysteresis=3) -> bool:
+last_states = {}
+last_actions = {}
+last_towers = {}
+tower_0 = {}
+tower_1 = {}
+def train_step(tower_0_metric: float, tower_1_metric: float, torre_atual: int, rnti, hysteresis=3) -> bool:
     global acc_reward, steps, \
-        last_state, last_action, \
-        last_tower
+        last_states, last_actions, \
+        last_towers, tower_0, tower_1
+    if rnti not in tower_0:
+        tower_0[rnti] = deque(maxlen=buf_len)
+        tower_1[rnti] = deque(maxlen=buf_len)
 
-    tower_0.appendleft(tower_0_metric)
-    tower_1.appendleft(tower_1_metric)
+    tower_0[rnti].appendleft(tower_0_metric)
+    tower_1[rnti].appendleft(tower_1_metric)
 
-    if len(tower_0) < buf_len:
+    if len(tower_0[rnti]) < buf_len:
         return False
 
     steps += 1
 
     if torre_atual:
-        dif = np.array(tower_1) - np.array(tower_0) + hysteresis
+        dif = np.array(tower_1[rnti]) - np.array(tower_0[rnti]) + hysteresis
     else:
-        dif = np.array(tower_0) - np.array(tower_1) + hysteresis
+        dif = np.array(tower_0[rnti]) - np.array(tower_1[rnti]) + hysteresis
+
 
     # first call
-    if last_state is None:
+    if rnti not in last_states:
         last_state = torch.tensor(dif, dtype=torch.float32).unsqueeze(0).unsqueeze(-1)
-        last_state = F.normalize(last_state)
-        last_action = select_action(last_state)
-        return last_action.item()
+        last_states[rnti] = F.normalize(last_state)
+        last_actions[rnti] = select_action(last_state)
+        return last_actions[rnti].item()
 
 
     state = torch.tensor(dif, dtype=torch.float32).unsqueeze(0).unsqueeze(-1)
-    last_state = F.normalize(last_state)
+    state = F.normalize(state)
     action = select_action(state)
 
-    if last_action.item(): # fez handover
-
-        if torre_atual == last_tower:  # handover rejeitado
-            reward = -200
-        else:  # handover accepted
-            reward = np.sum(dif) / len(dif)
-            if reward > 0:
-                reward *= 5
-            else:
-                reward -= 20
+    if last_actions[rnti].item(): # fez handover
+        reward = np.sum(dif) / len(dif)
+        if reward > 0:
+            reward *= 5
+        else:
+            reward -= 20
     else:
         reward = dif[0]
         reward = reward + 10 if reward > 0 else reward
 
     acc_reward += reward
     reward = torch.tensor([reward])
-    memory.push(last_state, last_action, state, reward)
+    memory.push(last_states[rnti], last_actions[rnti], state, reward)
 
     optimize_model()
 
@@ -197,25 +199,29 @@ def train_step(tower_0_metric: float, tower_1_metric: float, torre_atual: int, h
             torch.save(target_net.state_dict(), save_path)
         acc_reward = 0
 
-    last_state = state
-    last_action = action
-    last_tower = torre_atual
+    last_states[rnti] = state
+    last_actions[rnti] = action
+    last_towers[rnti] = torre_atual
     return action.item()
 
+difs = {}
+def handover_decision(tower_0_metric: float, tower_1_metric: float, torre_atual,rnti, hysteresis=3) -> bool:
+    global tower_0, tower_1
 
-def handover_decision(tower_0_metric: float, tower_1_metric: float, torre_atual, hysteresis=3) -> bool:
+    if rnti not in tower_0:
+        tower_0[rnti] = deque(maxlen=buf_len)
+        tower_1[rnti] = deque(maxlen=buf_len)
 
-    tower_0.appendleft(tower_0_metric)
-    tower_1.appendleft(tower_1_metric)
+    tower_0[rnti].appendleft(tower_0_metric)
+    tower_1[rnti].appendleft(tower_1_metric)
 
-    # wait enough metrics
-    if (len(tower_0) < buf_len):
+    if len(tower_0[rnti]) < buf_len:
         return False
 
     if torre_atual:
-        dif = np.array(tower_1) - np.array(tower_0) + hysteresis
+        dif = np.array(tower_1[rnti]) - np.array(tower_0[rnti]) + hysteresis
     else:
-        dif = np.array(tower_0) - np.array(tower_1) + hysteresis
+        dif = np.array(tower_0[rnti]) - np.array(tower_1[rnti]) + hysteresis
 
     state = torch.tensor(dif, dtype=torch.float32).unsqueeze(0).unsqueeze(-1)
     state = F.normalize(state)
