@@ -33,8 +33,8 @@ steps_done = 0
 save_path = None
 
 buf_len = 0
-tower_0 = deque()
-tower_1 = deque()
+tower_0 = {}
+tower_1 = {}
 
 
 def init_module(metric_buffer_len, n_actions,
@@ -47,8 +47,6 @@ def init_module(metric_buffer_len, n_actions,
         save_path, \
         tower_0, tower_1, buf_len
 
-    #tower_0 = deque(maxlen=metric_buffer_len)
-    #tower_1 = deque(maxlen=metric_buffer_len)
     buf_len = metric_buffer_len
 
     save_path = target_net_state_dict_save_path
