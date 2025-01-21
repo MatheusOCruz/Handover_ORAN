@@ -33,9 +33,6 @@ steps_done = 0
 save_path = None
 
 buf_len = 0
-tower_0 = {}
-tower_1 = {}
-
 
 def init_module(metric_buffer_len, n_actions,
                 target_net_state_dict_load_path=None,
@@ -202,7 +199,6 @@ def train_step(tower_0_metric: float, tower_1_metric: float, torre_atual: int, r
     last_towers[rnti] = torre_atual
     return action.item()
 
-difs = {}
 def handover_decision(tower_0_metric: float, tower_1_metric: float, torre_atual,rnti, hysteresis=3) -> bool:
     global tower_0, tower_1
 
