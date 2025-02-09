@@ -187,9 +187,9 @@ def train_step(tower_0_metric: float, tower_1_metric: float, torre_atual: int, r
 
     target_net.load_state_dict(target_net_state_dict)
 
-    if steps % 1000 == 0:
+    if steps % 100 == 0:
         print(steps)
-        print(f"avg reward:{acc_reward / 1000}")
+        print(f"avg reward:{acc_reward / 100}")
         if save_path is not None:
             torch.save(target_net.state_dict(), save_path)
         acc_reward = 0
