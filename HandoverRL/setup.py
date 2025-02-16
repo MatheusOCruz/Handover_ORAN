@@ -15,7 +15,10 @@ setup(
     version=VERSION,
     description=DESCRIPTION,
     packages=find_packages(),
-    install_requires=['torch', 'numpy', 'matplotlib'],
+     install_requires=['torch >= 2.6.0', 
+                      'numpy >= 2.2.2', 
+                      'matplotlib >= 3.10.0'],
+
 
 
 )
