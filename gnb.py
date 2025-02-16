@@ -86,8 +86,11 @@ class Gnb:
             plt.plot(x, gnb_0, color="blue")
             plt.plot(x, gnb_1, color="green")
 
-            plt.scatter(x2_0, gnb_0_points, color='red', zorder=5)
-            plt.scatter(x2_1, gnb_1_points, color='orange', zorder=5)
+            plt.scatter(x2_0, gnb_0_points, color='red', s=30, zorder=5)
+            plt.scatter(x2_1, gnb_1_points, color='orange', s=30,zorder=5)
+
+            plt.xlabel("time")
+            plt.ylabel("RSRP")
             
             plt.grid(True) 
         
