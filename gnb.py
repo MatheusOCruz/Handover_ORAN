@@ -72,7 +72,7 @@ class Gnb:
     def plot_things(self):
         x = np.arange(0, 4 * np.pi, 0.01)
         for rnti in range(len(self.ues)):
-            plt.figure() 
+            plt.figure(figsize=(1,1)) 
             
             gnb_0 = self.torres[rnti][0]
             gnb_1 = self.torres[rnti][1]
@@ -86,11 +86,14 @@ class Gnb:
             plt.plot(x, gnb_0, color="blue")
             plt.plot(x, gnb_1, color="green")
 
-            plt.scatter(x2_0, gnb_0_points, color='red', s=30, zorder=5)
-            plt.scatter(x2_1, gnb_1_points, color='orange', s=30,zorder=5)
+            plt.scatter(x2_0, gnb_0_points, color='red', s=100, zorder=5)
+            plt.scatter(x2_1, gnb_1_points, color='orange', s=100,zorder=5)
 
-            plt.xlabel("time")
-            plt.ylabel("RSRP")
+            plt.xticks(fontsize=25)
+            plt.yticks(fontsize=25)
+
+            plt.xlabel("Tempo simulado [amostra]", fontsize=20)
+            plt.ylabel("Potência recebida [RSRP]", fontsize=20)
             
             plt.grid(True) 
         
