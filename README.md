@@ -13,10 +13,10 @@ to choose the scenario being used, change the following line in `main.py`:
 gnb = Gnb([1,3])
 ```
 each entry in the vector is an UE, and the scenario represented by the int value can be found in the `gnb.py` file, and are: 
-![](images/Figure_1.png)
-![](images/Figure_2.png)
-![](images/Figure_3.png)
-![](images/Figure_4.png)
+[](images/Figure_1.png)
+[](images/Figure_2.png)
+[](images/Figure_3.png)
+[](images/Figure_4.png)
 
 To train the model, change the line:
 
