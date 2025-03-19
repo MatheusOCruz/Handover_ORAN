@@ -170,10 +170,10 @@ def train_step(tower_0_metric: float, tower_1_metric: float, torre_atual: int, h
             if reward > 0:
                 reward *= 5
             else:
-                reward -= 20
+                reward *= 2
     else:
         reward = dif[0]
-        reward = reward + 10 if reward > 0 else reward
+        reward = reward * 1.5 if reward > 0 else reward
 
     acc_reward += reward
     reward = torch.tensor([reward])
@@ -190,9 +190,9 @@ def train_step(tower_0_metric: float, tower_1_metric: float, torre_atual: int, h
 
     target_net.load_state_dict(target_net_state_dict)
 
-    if steps % 100 == 0:
+    if steps % 1000 == 0:
         print(steps)
-        print(f"avg reward:{acc_reward / 100}")
+        print(f"avg reward:{acc_reward / 1000}")
         if save_path is not None:
             torch.save(target_net.state_dict(), save_path)
         acc_reward = 0
